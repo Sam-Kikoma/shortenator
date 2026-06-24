@@ -6,37 +6,46 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
+  Query,
 } from '@nestjs/common';
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
+import { UrlExistsPipe } from './pipes/url-exists/url-exists.pipe';
+import type { Url } from '../../generated/prisma/client';
+import type { Response } from 'express';
+import { FilterDto } from './dto/filter-url.dto';
 
-@Controller('url')
+@Controller()
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
 
-  @Post()
+  @Post('url')
   create(@Body() createUrlDto: CreateUrlDto) {
     return this.urlService.create(createUrlDto);
   }
 
-  @Get()
-  findAll() {
-    return this.urlService.findAll();
+  @Get('url')
+  findAll(@Query() queryParams: FilterDto) {
+    return this.urlService.findAll(queryParams);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.urlService.findOne(+id);
+  @Get(':uid')
+  findOne(@Param('uid', UrlExistsPipe) url: Url, @Res() res: Response) {
+    res.redirect(url.redirect);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUrlDto: UpdateUrlDto) {
-    return this.urlService.update(+id, updateUrlDto);
+  @Patch('url/:uid')
+  update(
+    @Param('uid', UrlExistsPipe) url: Url,
+    @Body() updateUrlDto: UpdateUrlDto,
+  ) {
+    return this.urlService.update(url.id, updateUrlDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.urlService.remove(+id);
+  @Delete('url/:uid')
+  remove(@Param('uid') url: Url) {
+    return this.urlService.remove(url.id);
   }
 }
