@@ -1,7 +1,7 @@
 services:
-  nestjs_starter_postgress: # Update to match project name
+  shortenator_postgress: # Update to match project name
     image: postgres:17-alpine
-    container_name: nestjs_starter_postgres # Update to match project name
+    container_name: shortenator_postgres # Update to match project name
     restart: always
     env_file:
       - .env
@@ -11,20 +11,20 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - nestjs_starter_postgres_data:/var/lib/postgresql/data # Update
+      - shortenator_postgres_data:/var/lib/postgresql/data # Update
 
-  nestjs_starter_redis: # Update to match project name
+  shortenator_redis: # Update to match project name
     image: redis:alpine
-    container_name: nestjs_starter_redis # Update to match project name
+    container_name: shortenator_redis # Update to match project name
     ports:
       - '6380:6379'
     volumes:
-      - nestjs_starter_redis_data:/data #Update
+      - shortenator_redis_data:/data #Update
 
 networks:
   default:
-    name: nestjs_starter
+    name: shortenator
 
 volumes:
-  nestjs_starter_postgres_data: # Update
-  nestjs_starter_redis_data: # Update
+  shortenator_postgres_data: # Update
+  shortenator_redis_data: # Update
