@@ -4,6 +4,7 @@ import { UpdateUrlDto } from './dto/update-url.dto';
 import { UidService } from '../../services/uid/uid.service';
 import { DatabaseService } from '../../database/database.service';
 import { ConfigService } from '@nestjs/config';
+import { FilterDto } from './dto/filter-url.dto';
 
 @Injectable()
 export class UrlService {
@@ -29,19 +30,59 @@ export class UrlService {
     return url;
   }
 
-  findAll() {
-    return `This action returns all url`;
+  async findAll({ page = 1, limit = 10, filter }: FilterDto) {
+    const skip = (page - 1) * limit;
+    const whereClause = filter
+      ? {
+          OR: [
+            { title: { contains: filter } },
+            { description: { contains: filter } },
+            { redirect: { contains: filter } },
+            { url: { contains: filter } },
+          ],
+        }
+      : {};
+    const data = await this.databaseService.url.findMany({
+      where: whereClause,
+      skip,
+      take: limit,
+    });
+    const totalCount = await this.databaseService.url.count({
+      where: whereClause,
+    });
+
+    const meta = {
+      totalCount,
+      currentPage: page,
+      perPage: limit,
+      totalPages: Math.ceil(totalCount / limit),
+      hasNextPage: skip + limit < totalCount,
+      hasPreviousPage: skip > 0 && page > 1,
+    };
+
+    return { data, meta };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} url`;
+  async findOne(uid: string) {
+    return await this.databaseService.url.findUnique({
+      where: {
+        url: `${this.host}/${uid}`,
+      },
+    });
   }
 
-  update(id: number, updateUrlDto: UpdateUrlDto) {
-    return `This action updates a #${id} url`;
+  async update(id: number, updateUrlDto: UpdateUrlDto) {
+    return await this.databaseService.url.update({
+      where: {
+        id,
+      },
+      data: updateUrlDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} url`;
+  async remove(id: number) {
+    return await this.databaseService.url.delete({
+      where: { id },
+    });
   }
 }
