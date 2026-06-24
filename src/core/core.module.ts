@@ -16,6 +16,7 @@ import { CacheService } from './cache/cache.service';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
+      expandVariables: true,
     }),
     DatabaseModule,
     CacheModule.registerAsync({
